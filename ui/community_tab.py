@@ -16,11 +16,13 @@ SOURCE_LABELS = {
 CATEGORY_LABELS = {
     "gaming":      "🎮 게임",
     "engineering": "⚙️ 공학/과학",
+    "baseball":    "⚾ MLB",
 }
 
 SUBCATEGORY_OPTIONS = {
-    "gaming": ["전체", "게임 감상/토론", "게임 IP 덕질", "게임 뉴스"],
+    "gaming":      ["전체", "게임 감상/토론", "게임 IP 덕질", "게임 뉴스"],
     "engineering": ["전체", "산업/중장비", "공학/기계", "밀리터리", "소방/안전", "과학/자연"],
+    "baseball":    ["전체", "MLB 뉴스/토론"],
 }
 
 
@@ -29,7 +31,7 @@ def render_community_tab():
     with st.sidebar:
         category = st.radio(
             "카테고리",
-            options=["gaming", "engineering"],
+            options=["gaming", "engineering", "baseball"],
             format_func=lambda x: CATEGORY_LABELS.get(x, x),
         )
 

@@ -64,6 +64,20 @@ DISCOVERY_CONFIG = {
             ("retro gaming history explained", "US"),
         ],
     },
+    "baseball": {
+        "MLB 하이라이트": [
+            ("MLB highlights amazing moments shorts", "US"),
+            ("baseball best plays catches shorts", "US"),
+        ],
+        "야구 역사/기록": [
+            ("baseball history records facts shorts", "US"),
+            ("MLB legendary moments history shorts", "US"),
+        ],
+        "야구 팩트/분석": [
+            ("baseball facts you didn't know shorts", "US"),
+            ("MLB stats analysis explained shorts", "US"),
+        ],
+    },
 }
 
 

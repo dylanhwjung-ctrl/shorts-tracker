@@ -11,11 +11,13 @@ from database.client import get_client
 SUBCATEGORY_OPTIONS = {
     "engineering": ["전체", "산업/중장비", "공학/기계", "밀리터리", "소방/안전", "과학/자연"],
     "gaming":      ["전체", "게임 로어/세계관", "게임 비하인드", "게임 이스터에그", "게임 역사"],
+    "baseball":    ["전체", "MLB 하이라이트", "야구 역사/기록", "야구 팩트/분석"],
 }
 
 CATEGORY_LABELS = {
     "engineering": "⚙️ 공학/과학",
     "gaming":      "🎮 게임",
+    "baseball":    "⚾ MLB",
 }
 
 COUNTRY_FLAGS = {
@@ -58,7 +60,7 @@ def render_channels_tab():
     with st.sidebar:
         category = st.radio(
             "카테고리",
-            ["engineering", "gaming"],
+            ["engineering", "gaming", "baseball"],
             format_func=lambda x: CATEGORY_LABELS[x],
         )
 

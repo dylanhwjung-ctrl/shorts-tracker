@@ -123,6 +123,15 @@ def main():
         min_score=500,
     )
 
+    # ── MLB 야구 ───────────────────────────────────────
+    print("\n[MLB] Reddit r/baseball")
+    reddit_crawler.run(
+        category="baseball",
+        subcategory="MLB 뉴스/토론",
+        subreddits=["baseball"],
+        min_score=500,
+    )
+
     # ── 해외 채널 트래커 ───────────────────────────────
     print("\n[채널] 해외 채널 통계 갱신")
     channel_crawler.run(category="engineering", mode="update")
