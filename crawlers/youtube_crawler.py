@@ -3,6 +3,7 @@ YouTube 크롤러 — 국가별 급상승 영상 수집 (KR / JP / US)
 YouTube Data API v3 사용
 """
 import os
+import re
 import sys
 from datetime import date
 
@@ -25,6 +26,19 @@ YOUTUBE_CATEGORY_IDS = {
 COUNTRIES = ["KR", "JP", "US"]
 
 
+def parse_duration(duration_str: str) -> int:
+    """ISO 8601 duration → 초 단위. 예: PT4M13S → 253, PT58S → 58"""
+    if not duration_str:
+        return 0
+    match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', duration_str)
+    if not match:
+        return 0
+    h = int(match.group(1) or 0)
+    m = int(match.group(2) or 0)
+    s = int(match.group(3) or 0)
+    return h * 3600 + m * 60 + s
+
+
 def get_youtube_client():
     api_key = os.getenv("YOUTUBE_API_KEY")
     return build("youtube", "v3", developerKey=api_key)
@@ -33,7 +47,7 @@ def get_youtube_client():
 def fetch_trending(youtube, region: str, category_id: str, max_results: int = 30) -> list[dict]:
     try:
         response = youtube.videos().list(
-            part="snippet,statistics",
+            part="snippet,statistics,contentDetails",
             chart="mostPopular",
             regionCode=region,
             videoCategoryId=category_id,
@@ -42,10 +56,10 @@ def fetch_trending(youtube, region: str, category_id: str, max_results: int = 30
         return response.get("items", [])
     except Exception as e:
         print(f"  [오류] {region} 급상승 조회 실패: {e}")
-        # 카테고리 필터 없이 재시도 (해당 국가에 카테고리 데이터 없을 수 있음)
+        # 카테고리 필터 없이 재시도
         try:
             response = youtube.videos().list(
-                part="snippet,statistics",
+                part="snippet,statistics,contentDetails",
                 chart="mostPopular",
                 regionCode=region,
                 maxResults=max_results,
@@ -64,22 +78,26 @@ def save_videos(videos: list[dict], country: str, period: str, category: str) ->
     for v in videos:
         stats = v.get("statistics", {})
         snippet = v.get("snippet", {})
+        content = v.get("contentDetails", {})
+        duration_str = content.get("duration", "")
+        duration_seconds = parse_duration(duration_str)
+
         rows.append({
-            "video_id":      v["id"],
-            "title":         snippet.get("title", ""),
-            "channel_name":  snippet.get("channelTitle", ""),
-            "country":       country,
-            "period":        period,
-            "views":         int(stats.get("viewCount", 0)),
-            "view_increase": 0,   # 초기값 0, 나중에 이전 데이터와 비교해 계산
-            "category":      category,
-            "collected_date": today,
+            "video_id":         v["id"],
+            "title":            snippet.get("title", ""),
+            "channel_name":     snippet.get("channelTitle", ""),
+            "country":          country,
+            "period":           period,
+            "views":            int(stats.get("viewCount", 0)),
+            "view_increase":    0,
+            "category":         category,
+            "collected_date":   today,
+            "duration_seconds": duration_seconds,
         })
 
     if not rows:
         return 0
 
-    # 같은 날짜·영상·기간이면 업데이트 (upsert)
     client.table("youtube_videos").upsert(
         rows, on_conflict="video_id,period,collected_date"
     ).execute()

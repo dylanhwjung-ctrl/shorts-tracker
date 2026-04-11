@@ -5,7 +5,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from crawlers import reddit_crawler, ruliweb_crawler, youtube_crawler
+from crawlers import reddit_crawler, ruliweb_crawler, youtube_crawler, hackernews_crawler
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
     print("=" * 50)
 
     # ── 게임 카테고리 ──────────────────────────────
-    print("\n[1/5] Reddit (게임 스토리/덕질 커뮤니티)")
+    print("\n[1/7] Reddit (게임 스토리/덕질 커뮤니티)")
     reddit_crawler.run(
         category="gaming",
         subreddits=[
@@ -29,14 +29,14 @@ def main():
         min_score=100,
     )
 
-    print("\n[2/5] 루리웹 (게임 게시판)")
+    print("\n[2/7] 루리웹 (게임 게시판)")
     ruliweb_crawler.run(
         category="gaming",
         urls=["https://bbs.ruliweb.com/game"],
         min_hit=100,
     )
 
-    print("\n[3/5] YouTube 급상승 (게임)")
+    print("\n[3/7] YouTube 급상승 (게임)")
     youtube_crawler.run(
         category="gaming",
         countries=["KR", "JP", "US"],
@@ -44,22 +44,39 @@ def main():
     )
 
     # ── 공학/과학 카테고리 ─────────────────────────
-    print("\n[4/5] Reddit (공학/과학/밀리터리)")
+    print("\n[4/7] Reddit (공학/과학/밀리터리)")
     reddit_crawler.run(
         category="engineering",
         subreddits=[
-            "interestingasfuck",    # 흥미로운 산업/공학 영상
-            "Damnthatsinteresting", # 놀라운 사실/현상
+            "interestingasfuck",    # 산업 현장·중장비·특수 기술
+            "Damnthatsinteresting", # 공학 원리·놀라운 사실
             "educationalgifs",      # 시각적 원리 설명
-            "oddlysatisfying",      # 기계/공정 영상
-            "todayilearned",        # 몰랐던 사실 (TIL)
-            "military",             # 군사/무기 체계
+            "oddlysatisfying",      # 기계 공정·제조 과정
+            "todayilearned",        # 몰랐던 과학/공학 사실 (TIL)
+            "military",             # 군사·무기 체계·비하인드
             "engineering",          # 공학 토론
+            "MachinePorn",          # 기계 내부 구조·역사 장비
+            "mechanical_gifs",      # 기계 작동 원리 GIF
+            "InfrastructurePorn",   # 댐·교량·철도 인프라
+            "aviation",             # 항공·전투기
         ],
         min_score=500,
     )
 
-    print("\n[5/5] YouTube 급상승 (과학/기술)")
+    print("\n[5/7] Hacker News (공학/기술 심층 토론)")
+    hackernews_crawler.run(
+        category="engineering",
+        min_score=200,
+    )
+
+    print("\n[6/7] 루리웹 (밀리터리/역사 게시판)")
+    ruliweb_crawler.run(
+        category="engineering",
+        urls=["https://bbs.ruliweb.com/hobby/board/300143"],  # 밀리터리 게시판
+        min_hit=50,
+    )
+
+    print("\n[7/7] YouTube 급상승 (과학/기술)")
     youtube_crawler.run(
         category="engineering",
         countries=["KR", "US"],
