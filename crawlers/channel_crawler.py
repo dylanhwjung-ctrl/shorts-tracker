@@ -17,6 +17,8 @@ from database.client import get_client
 
 load_dotenv()
 
+MAX_CHANNELS = 300  # 전체 채널 상한
+
 # ── 카테고리/서브카테고리별 탐색 설정 (keyword, regionCode) ────────────────
 DISCOVERY_CONFIG = {
     "engineering": {
@@ -130,8 +132,55 @@ def fetch_channel_info(youtube, channel_ids: list[str]) -> list[dict]:
         return []
 
 
+def remove_low_performers(client, n: int) -> int:
+    """조회수 증가량 하위 채널 n개 제거 (즐겨찾기·통계없는 신규 채널 제외)"""
+    if n <= 0:
+        return 0
+
+    week_ago = (date.today() - timedelta(days=7)).isoformat()
+
+    stats = (
+        client.table("channel_daily_stats")
+        .select("channel_id,view_increase")
+        .gte("collected_date", week_ago)
+        .execute()
+        .data
+    )
+
+    # 채널별 7일 평균 조회수 증가량
+    sums: dict[str, int] = {}
+    counts: dict[str, int] = {}
+    for row in stats:
+        cid = row["channel_id"]
+        sums[cid] = sums.get(cid, 0) + int(row.get("view_increase", 0))
+        counts[cid] = counts.get(cid, 0) + 1
+    avg = {cid: sums[cid] / counts[cid] for cid in sums}
+
+    # 즐겨찾기가 아닌 채널 중 통계가 있는 것만 대상
+    all_channels = (
+        client.table("watched_channels")
+        .select("channel_id,is_favorite")
+        .execute()
+        .data
+    )
+    removable = [
+        ch["channel_id"] for ch in all_channels
+        if not ch.get("is_favorite") and ch["channel_id"] in avg
+    ]
+
+    # 평균 조회수 증가량 오름차순 → 하위부터 제거
+    removable.sort(key=lambda cid: avg.get(cid, 0))
+    to_remove = removable[:n]
+
+    if to_remove:
+        client.table("watched_channels").delete().in_("channel_id", to_remove).execute()
+        print(f"  → 하위 채널 {len(to_remove)}개 제거 (7일 평균 조회수 증가 기준)")
+
+    return len(to_remove)
+
+
 def discover(category: str = "engineering", max_per_keyword: int = 5):
-    """새 채널 발굴 — 기존 등록 채널은 건너뜀"""
+    """새 채널 발굴 — 300개 상한 초과 시 하위 채널 자동 교체"""
     client = get_client()
     youtube = get_youtube_client()
 
@@ -176,6 +225,14 @@ def discover(category: str = "engineering", max_per_keyword: int = 5):
             })
 
         if rows:
+            # 상한 초과 시 하위 채널 먼저 제거
+            current_count = len(existing)
+            overflow = (current_count + len(rows)) - MAX_CHANNELS
+            if overflow > 0:
+                print(f"  채널 상한({MAX_CHANNELS}) 초과 예상 → 하위 {overflow}개 제거 중...")
+                removed = remove_low_performers(client, overflow)
+                existing = {r["channel_id"] for r in client.table("watched_channels").select("channel_id").execute().data}
+
             client.table("watched_channels").upsert(rows, on_conflict="channel_id").execute()
             added_total += len(rows)
             existing.update(r["channel_id"] for r in rows)
@@ -187,21 +244,23 @@ def discover(category: str = "engineering", max_per_keyword: int = 5):
 
 # ── 일별 통계 갱신 ────────────────────────────────────────────────────
 
-def fetch_recent_shorts(youtube, channel_id: str, max_results: int = 8) -> list[dict]:
+def fetch_recent_shorts(youtube, channel_id: str, max_results: int = 5) -> list[dict]:
+    """playlistItems.list 사용 (2 유닛/채널, search.list 대비 50배 절약)"""
     try:
-        resp = youtube.search().list(
+        # 업로드 플레이리스트 ID: UC→UU 치환
+        uploads_playlist_id = "UU" + channel_id[2:]
+
+        resp = youtube.playlistItems().list(
             part="snippet",
-            channelId=channel_id,
-            type="video",
-            videoDuration="short",
-            order="date",
-            maxResults=max_results,
+            playlistId=uploads_playlist_id,
+            maxResults=max_results * 3,  # Shorts 필터 후 max_results 보장
         ).execute()
+
         items = resp.get("items", [])
         if not items:
             return []
 
-        video_ids = [it["id"]["videoId"] for it in items]
+        video_ids = [item["snippet"]["resourceId"]["videoId"] for item in items]
 
         detail_resp = youtube.videos().list(
             part="contentDetails,snippet",
@@ -222,6 +281,8 @@ def fetch_recent_shorts(youtube, channel_id: str, max_results: int = 8) -> list[
                     "published_at":     snippet.get("publishedAt", ""),
                     "duration_seconds": dur,
                 })
+                if len(shorts) >= max_results:
+                    break
         return shorts
     except Exception as e:
         print(f"  [오류] 쇼츠 조회 실패 ({channel_id}): {e}")
