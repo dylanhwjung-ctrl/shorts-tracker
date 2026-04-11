@@ -1,0 +1,302 @@
+"""
+YouTube 채널 트래커 — 해외 쇼츠 채널 발굴 및 일별 통계 수집
+두 가지 모드:
+  discover : 키워드로 새 채널 탐색 → watched_channels 에 추가
+  update   : 기존 채널 통계 갱신 → channel_daily_stats 에 저장
+"""
+import os
+import re
+import sys
+from datetime import date, timedelta
+
+from googleapiclient.discovery import build
+from dotenv import load_dotenv
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from database.client import get_client
+
+load_dotenv()
+
+# ── 카테고리/서브카테고리별 탐색 설정 (keyword, regionCode) ────────────────
+DISCOVERY_CONFIG = {
+    "engineering": {
+        "산업/중장비": [
+            ("heavy equipment machine shorts", "US"),
+            ("mining truck industrial process", "US"),
+            ("重機 工場 機械", "JP"),
+        ],
+        "공학/기계": [
+            ("mechanical engineering explained shorts", "US"),
+            ("how machines work principles", "US"),
+            ("機械 仕組み 解説", "JP"),
+        ],
+        "밀리터리": [
+            ("military weapons technology shorts", "US"),
+            ("fighter jet secrets military equipment", "US"),
+            ("軍事 兵器 技術 解説", "JP"),
+        ],
+        "소방/안전": [
+            ("firefighter equipment secrets shorts", "US"),
+            ("fire rescue technology safety", "US"),
+            ("消防 救助 技術", "JP"),
+        ],
+        "과학/자연": [
+            ("science experiment amazing shorts", "US"),
+            ("physics chemistry explained simple", "US"),
+            ("科学 実験 解説", "JP"),
+        ],
+    },
+    "gaming": {
+        "게임 로어/세계관": [
+            ("video game lore explained shorts", "US"),
+            ("game story lore secrets shorts", "US"),
+        ],
+        "게임 비하인드": [
+            ("video game development secrets shorts", "US"),
+            ("game dev behind scenes facts", "US"),
+        ],
+        "게임 이스터에그": [
+            ("video game easter eggs shorts", "US"),
+            ("hidden game secrets discovered shorts", "US"),
+        ],
+        "게임 역사": [
+            ("video game history facts shorts", "US"),
+            ("retro gaming history explained", "US"),
+        ],
+    },
+}
+
+
+def get_youtube_client():
+    api_key = os.getenv("YOUTUBE_API_KEY")
+    return build("youtube", "v3", developerKey=api_key)
+
+
+def parse_duration(duration_str: str) -> int:
+    if not duration_str:
+        return 0
+    match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', duration_str)
+    if not match:
+        return 0
+    h = int(match.group(1) or 0)
+    m = int(match.group(2) or 0)
+    s = int(match.group(3) or 0)
+    return h * 3600 + m * 60 + s
+
+
+# ── 채널 발굴 ─────────────────────────────────────────────────────────
+
+def search_channels(youtube, keyword: str, country: str, max_results: int = 10) -> list[dict]:
+    try:
+        resp = youtube.search().list(
+            part="snippet",
+            type="channel",
+            q=keyword,
+            regionCode=country,
+            maxResults=max_results,
+        ).execute()
+        return resp.get("items", [])
+    except Exception as e:
+        print(f"  [오류] 채널 검색 실패 ({keyword}): {e}")
+        return []
+
+
+def fetch_channel_info(youtube, channel_ids: list[str]) -> list[dict]:
+    if not channel_ids:
+        return []
+    try:
+        resp = youtube.channels().list(
+            part="snippet,statistics",
+            id=",".join(channel_ids),
+            maxResults=50,
+        ).execute()
+        return resp.get("items", [])
+    except Exception as e:
+        print(f"  [오류] 채널 정보 조회 실패: {e}")
+        return []
+
+
+def discover(category: str = "engineering", max_per_keyword: int = 5):
+    """새 채널 발굴 — 기존 등록 채널은 건너뜀"""
+    client = get_client()
+    youtube = get_youtube_client()
+
+    existing = {r["channel_id"] for r in client.table("watched_channels").select("channel_id").execute().data}
+
+    cat_config = DISCOVERY_CONFIG.get(category, {})
+    if not cat_config:
+        print(f"  [오류] 알 수 없는 카테고리: {category}")
+        return 0
+
+    added_total = 0
+
+    for subcategory, searches in cat_config.items():
+        print(f"\n  [{subcategory}] 채널 탐색 중...")
+        found_ids: set[str] = set()
+
+        for keyword, country in searches:
+            items = search_channels(youtube, keyword, country, max_results=max_per_keyword)
+            for item in items:
+                cid = item["snippet"]["channelId"]
+                if cid not in existing:
+                    found_ids.add(cid)
+
+        if not found_ids:
+            print(f"  → 신규 채널 없음")
+            continue
+
+        channels = fetch_channel_info(youtube, list(found_ids))
+        rows = []
+        for ch in channels:
+            cid = ch["id"]
+            snippet = ch.get("snippet", {})
+            ch_country = snippet.get("country", "US")
+            rows.append({
+                "channel_id":    cid,
+                "channel_name":  snippet.get("title", ""),
+                "handle":        snippet.get("customUrl", ""),
+                "country":       ch_country,
+                "category":      category,
+                "subcategory":   subcategory,
+                "thumbnail_url": (snippet.get("thumbnails", {}).get("default", {}) or {}).get("url", ""),
+            })
+
+        if rows:
+            client.table("watched_channels").upsert(rows, on_conflict="channel_id").execute()
+            added_total += len(rows)
+            existing.update(r["channel_id"] for r in rows)
+            print(f"  → {len(rows)}개 채널 추가")
+
+    print(f"\n채널 발굴 완료: 총 {added_total}개 신규 추가")
+    return added_total
+
+
+# ── 일별 통계 갱신 ────────────────────────────────────────────────────
+
+def fetch_recent_shorts(youtube, channel_id: str, max_results: int = 8) -> list[dict]:
+    try:
+        resp = youtube.search().list(
+            part="snippet",
+            channelId=channel_id,
+            type="video",
+            videoDuration="short",
+            order="date",
+            maxResults=max_results,
+        ).execute()
+        items = resp.get("items", [])
+        if not items:
+            return []
+
+        video_ids = [it["id"]["videoId"] for it in items]
+
+        detail_resp = youtube.videos().list(
+            part="contentDetails,snippet",
+            id=",".join(video_ids),
+        ).execute()
+
+        shorts = []
+        for v in detail_resp.get("items", []):
+            dur = parse_duration(v.get("contentDetails", {}).get("duration", ""))
+            if dur <= 60:
+                snippet = v.get("snippet", {})
+                thumb = (snippet.get("thumbnails", {}).get("medium", {}) or {}).get("url", "")
+                shorts.append({
+                    "video_id":         v["id"],
+                    "channel_id":       channel_id,
+                    "title":            snippet.get("title", ""),
+                    "thumbnail_url":    thumb,
+                    "published_at":     snippet.get("publishedAt", ""),
+                    "duration_seconds": dur,
+                })
+        return shorts
+    except Exception as e:
+        print(f"  [오류] 쇼츠 조회 실패 ({channel_id}): {e}")
+        return []
+
+
+def update():
+    """등록된 모든 채널 통계를 오늘 날짜로 갱신"""
+    client = get_client()
+    youtube = get_youtube_client()
+    today = date.today().isoformat()
+    yesterday = (date.today() - timedelta(days=1)).isoformat()
+
+    channels = client.table("watched_channels").select("channel_id,channel_name,subcategory").execute().data
+
+    if not channels:
+        print("  등록된 채널이 없습니다. 먼저 discover 모드를 실행하세요.")
+        return 0
+
+    print(f"  {len(channels)}개 채널 통계 갱신 중...")
+
+    yesterday_stats = {}
+    y_rows = (
+        client.table("channel_daily_stats")
+        .select("channel_id,subscriber_count,total_views")
+        .eq("collected_date", yesterday)
+        .execute()
+        .data
+    )
+    for r in y_rows:
+        yesterday_stats[r["channel_id"]] = r
+
+    channel_ids = [ch["channel_id"] for ch in channels]
+    all_channel_info = []
+    for i in range(0, len(channel_ids), 50):
+        batch = channel_ids[i:i+50]
+        all_channel_info.extend(fetch_channel_info(youtube, batch))
+
+    stat_rows = []
+    for ch_info in all_channel_info:
+        cid = ch_info["id"]
+        stats = ch_info.get("statistics", {})
+        subs  = int(stats.get("subscriberCount", 0))
+        views = int(stats.get("viewCount", 0))
+        vids  = int(stats.get("videoCount", 0))
+
+        prev = yesterday_stats.get(cid, {})
+        sub_inc  = subs  - int(prev.get("subscriber_count", subs))
+        view_inc = views - int(prev.get("total_views", views))
+
+        stat_rows.append({
+            "channel_id":          cid,
+            "collected_date":      today,
+            "subscriber_count":    subs,
+            "total_views":         views,
+            "video_count":         vids,
+            "subscriber_increase": sub_inc,
+            "view_increase":       view_inc,
+        })
+
+    if stat_rows:
+        client.table("channel_daily_stats").upsert(
+            stat_rows, on_conflict="channel_id,collected_date"
+        ).execute()
+
+    shorts_rows = []
+    for ch in channels:
+        shorts = fetch_recent_shorts(youtube, ch["channel_id"])
+        shorts_rows.extend(shorts)
+
+    if shorts_rows:
+        client.table("channel_recent_shorts").upsert(
+            shorts_rows, on_conflict="video_id"
+        ).execute()
+
+    print(f"  → {len(stat_rows)}개 채널 통계, {len(shorts_rows)}개 쇼츠 저장")
+    return len(stat_rows)
+
+
+def run(category: str = "engineering", mode: str = "update"):
+    if mode == "discover":
+        print(f"[채널 발굴] 카테고리={category}")
+        return discover(category)
+    else:
+        print(f"[채널 통계 갱신] 전체 채널")
+        return update()
+
+
+if __name__ == "__main__":
+    mode = sys.argv[1] if len(sys.argv) > 1 else "update"
+    category = sys.argv[2] if len(sys.argv) > 2 else "engineering"
+    run(category=category, mode=mode)

@@ -24,7 +24,7 @@ def fetch_subreddit_hot(subreddit: str, limit: int = 25) -> list[dict]:
         return []
 
 
-def save_posts(posts: list[dict], subreddit: str, category: str, min_score: int) -> int:
+def save_posts(posts: list[dict], subreddit: str, category: str, min_score: int, subcategory: str = None) -> int:
     client = get_client()
     rows = []
     for p in posts:
@@ -32,7 +32,7 @@ def save_posts(posts: list[dict], subreddit: str, category: str, min_score: int)
             continue
         if p.get("stickied"):   # 공지글 제외
             continue
-        rows.append({
+        row = {
             "source": "reddit",
             "board_name": f"r/{subreddit}",
             "title": p["title"],
@@ -43,7 +43,10 @@ def save_posts(posts: list[dict], subreddit: str, category: str, min_score: int)
             "original_at": datetime.fromtimestamp(
                 p["created_utc"], tz=timezone.utc
             ).isoformat(),
-        })
+        }
+        if subcategory:
+            row["subcategory"] = subcategory
+        rows.append(row)
 
     if not rows:
         return 0
@@ -53,7 +56,7 @@ def save_posts(posts: list[dict], subreddit: str, category: str, min_score: int)
     return len(rows)
 
 
-def run(category: str = "gaming", subreddits: list = None, min_score: int = 100):
+def run(category: str = "gaming", subreddits: list = None, min_score: int = 100, subcategory: str = None):
     if subreddits is None:
         subreddits = ["gaming", "Games"]
 
@@ -61,7 +64,7 @@ def run(category: str = "gaming", subreddits: list = None, min_score: int = 100)
     for sub in subreddits:
         print(f"  r/{sub} 크롤링 중...")
         posts = fetch_subreddit_hot(sub)
-        saved = save_posts(posts, sub, category, min_score)
+        saved = save_posts(posts, sub, category, min_score, subcategory)
         total += saved
         print(f"  → {saved}개 저장 완료")
         time.sleep(2)   # Reddit 요청 간격 준수

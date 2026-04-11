@@ -73,34 +73,39 @@ def fetch_posts(url: str, min_hit: int = 100) -> list[dict]:
     return results
 
 
-def save_posts(posts: list[dict], board_name: str, category: str) -> int:
+def save_posts(posts: list[dict], board_name: str, category: str, subcategory: str = None) -> int:
     if not posts:
         return 0
     client = get_client()
-    rows = [{
-        "source": "ruliweb",
-        "board_name": board_name,
-        "title": p["title"],
-        "url": p["url"],
-        "score": p["score"],
-        "comment_count": p["comment_count"],
-        "category": category,
-    } for p in posts]
+    rows = []
+    for p in posts:
+        row = {
+            "source": "ruliweb",
+            "board_name": board_name,
+            "title": p["title"],
+            "url": p["url"],
+            "score": p["score"],
+            "comment_count": p["comment_count"],
+            "category": category,
+        }
+        if subcategory:
+            row["subcategory"] = subcategory
+        rows.append(row)
 
     client.table("posts").upsert(rows, on_conflict="url").execute()
     return len(rows)
 
 
-def run(category: str = "gaming", urls: list = None, min_hit: int = 100):
+def run(category: str = "gaming", urls: list = None, min_hit: int = 100, subcategory: str = None, board_name: str = None):
     if urls is None:
         urls = DEFAULT_URLS
 
     total = 0
     for url in urls:
-        board_name = "루리웹_게임뉴스"
-        print(f"  루리웹 크롤링 중...")
+        _board_name = board_name or "루리웹_게임뉴스"
+        print(f"  루리웹 크롤링 중... ({_board_name})")
         posts = fetch_posts(url, min_hit)
-        saved = save_posts(posts, board_name, category)
+        saved = save_posts(posts, _board_name, category, subcategory)
         total += saved
         print(f"  → {saved}개 저장 완료")
         time.sleep(2)

@@ -13,10 +13,10 @@ try:
         if key in st.secrets:
             os.environ[key] = st.secrets[key]
 except Exception:
-    pass  # 로컬: secrets.toml 없으면 .env 파일 사용
+    pass
 
 from ui.community_tab import render_community_tab
-from ui.youtube_tab import render_youtube_tab
+from ui.channels_tab import render_channels_tab
 
 st.set_page_config(
     page_title="Shorts Trend Tracker",
@@ -25,12 +25,15 @@ st.set_page_config(
 )
 
 st.title("📊 Shorts Trend Tracker")
-st.caption("유튜브 쇼츠 소재 발굴 대시보드 — 커뮤니티 화제글 + 유튜브 급상승")
 
-tab1, tab2 = st.tabs(["🗨️ 커뮤니티 트렌드", "▶️ 유튜브 급상승"])
+page = st.sidebar.radio(
+    "페이지",
+    ["🗨️ 커뮤니티 트렌드", "📡 해외 채널 트래커"],
+    label_visibility="collapsed",
+)
+st.sidebar.divider()
 
-with tab1:
+if page == "🗨️ 커뮤니티 트렌드":
     render_community_tab()
-
-with tab2:
-    render_youtube_tab()
+else:
+    render_channels_tab()
