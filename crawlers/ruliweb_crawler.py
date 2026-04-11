@@ -1,6 +1,7 @@
 """
 루리웹 크롤러 — BeautifulSoup 스크래핑
 """
+import re
 import time
 import httpx
 import sys
@@ -17,7 +18,7 @@ HEADERS = {
 }
 
 DEFAULT_URLS = [
-    "https://bbs.ruliweb.com/news/board/1003",  # 게임뉴스
+    "https://bbs.ruliweb.com/game",  # 게임 게시판 (스토리/덕질 토론)
 ]
 
 
@@ -38,12 +39,17 @@ def fetch_posts(url: str, min_hit: int = 100) -> list[dict]:
             if not title_tag:
                 continue
 
-            title = title_tag.get_text(strip=True)
+            # 제목 텍스트에서 댓글수 [N] 추출 후 제목 정리
+            full_text = title_tag.get_text(strip=True)
+            comment_match = re.search(r'\[(\d+)\]', full_text)
+            comment_count = int(comment_match.group(1)) if comment_match else 0
+            title = re.sub(r'\s*\[\d+\]\s*$', '', full_text).strip()
+
             href = title_tag.get("href", "")
             if not href.startswith("http"):
                 href = "https://bbs.ruliweb.com" + href
 
-            # 조회수 (루리웹 뉴스 게시판은 추천수 미표시)
+            # 조회수
             hit_tag = row.select_one("td.hit")
             hit = 0
             if hit_tag:
@@ -58,8 +64,8 @@ def fetch_posts(url: str, min_hit: int = 100) -> list[dict]:
             results.append({
                 "title": title,
                 "url": href,
-                "score": hit,       # 조회수를 score로 사용
-                "comment_count": 0,
+                "score": hit,
+                "comment_count": comment_count,
             })
         except Exception:
             continue

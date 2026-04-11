@@ -16,9 +16,10 @@ load_dotenv()
 
 # 카테고리별 YouTube 카테고리 ID
 YOUTUBE_CATEGORY_IDS = {
-    "gaming":     "20",   # 게임
-    "movies":     "1",    # 영화 & 애니메이션
-    "it_gadgets": "28",   # 과학 & 기술
+    "gaming":      "20",  # 게임
+    "movies":      "1",   # 영화 & 애니메이션
+    "it_gadgets":  "28",  # 과학 & 기술
+    "engineering": "28",  # 과학 & 기술 (공학/과학 카테고리)
 }
 
 COUNTRIES = ["KR", "JP", "US"]

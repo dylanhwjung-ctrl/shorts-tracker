@@ -9,9 +9,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database.client import get_client
 
 SOURCE_LABELS = {
-    "reddit": "Reddit",
+    "reddit":  "Reddit",
     "ruliweb": "루리웹",
-    "hackernews": "Hacker News",
+}
+
+CATEGORY_LABELS = {
+    "gaming":      "🎮 게임 스토리/덕질",
+    "engineering": "⚙️ 공학/과학/밀리터리",
 }
 
 
@@ -20,12 +24,20 @@ def render_community_tab():
 
     with col_filter:
         st.subheader("필터")
+
+        category = st.radio(
+            "카테고리",
+            options=["gaming", "engineering"],
+            format_func=lambda x: CATEGORY_LABELS.get(x, x),
+        )
+
         sources = st.multiselect(
             "소스",
-            options=["reddit", "ruliweb", "hackernews"],
-            default=["reddit", "ruliweb", "hackernews"],
+            options=["reddit", "ruliweb"],
+            default=["reddit", "ruliweb"],
             format_func=lambda x: SOURCE_LABELS.get(x, x),
         )
+
         sort_by = st.radio("정렬", ["점수 높은순", "최신순"])
 
     with col_main:
@@ -34,7 +46,12 @@ def render_community_tab():
             return
 
         client = get_client()
-        query = client.table("posts").select("*").in_("source", sources)
+        query = (
+            client.table("posts")
+            .select("*")
+            .eq("category", category)
+            .in_("source", sources)
+        )
 
         if sort_by == "점수 높은순":
             query = query.order("score", desc=True)

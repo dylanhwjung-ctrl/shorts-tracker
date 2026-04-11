@@ -106,17 +106,18 @@ CREATE INDEX idx_posts_collected_at ON posts (collected_at);
 ### 테이블 2: `youtube_videos` (유튜브 급상승 영상)
 ```sql
 CREATE TABLE youtube_videos (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  video_id      TEXT NOT NULL,        -- 유튜브 영상 ID
-  title         TEXT NOT NULL,
-  channel_name  TEXT,
-  country       TEXT NOT NULL,        -- 'KR', 'JP', 'US'
-  period        TEXT NOT NULL,        -- 'daily', 'weekly'
-  views         BIGINT DEFAULT 0,
-  view_increase BIGINT DEFAULT 0,     -- 기간 내 조회수 증가량
-  category      TEXT NOT NULL,
-  collected_at  TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE (video_id, period, collected_at::DATE)
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  video_id       TEXT NOT NULL,        -- 유튜브 영상 ID
+  title          TEXT NOT NULL,
+  channel_name   TEXT,
+  country        TEXT NOT NULL,        -- 'KR', 'JP', 'US'
+  period         TEXT NOT NULL,        -- 'daily', 'weekly'
+  views          BIGINT DEFAULT 0,
+  view_increase  BIGINT DEFAULT 0,     -- 기간 내 조회수 증가량
+  category       TEXT NOT NULL,
+  collected_date DATE DEFAULT CURRENT_DATE,
+  collected_at   TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (video_id, period, collected_date)
 );
 ```
 
@@ -193,10 +194,21 @@ ai_prompt: |
 
 | 단계 | 내용 | 상태 |
 |------|------|------|
-| M1 | 개발 환경 + DB 세팅 | 진행 중 |
-| M2 | 크롤러 구축 + GitHub Actions 자동화 | 대기 |
+| M1 | 개발 환경 + DB 세팅 | ✅ 완료 |
+| M2 | 크롤러 구축 + GitHub Actions 자동화 | 진행 중 |
 | M3 | 카테고리 프로필 시스템 + AI 판단 연동 | 대기 |
 | M4 | Streamlit 대시보드 UI + 배포 | 대기 |
+
+## 크롤러 현황
+
+| 소스 | 파일 | 상태 |
+|------|------|------|
+| Reddit | crawlers/reddit_crawler.py | ✅ 작동 (공개 JSON API) |
+| 루리웹 | crawlers/ruliweb_crawler.py | ✅ 작동 |
+| Hacker News | crawlers/hackernews_crawler.py | ✅ 작동 (공식 API) |
+| YouTube | crawlers/youtube_crawler.py | ✅ 작동 |
+| FM코리아 | crawlers/fmkorea_crawler.py | ⏸ 보류 — 430 봇 차단, Playwright 필요 |
+| 디시인사이드 | crawlers/dcinside_crawler.py | ⏸ 보류 — 차단 심함 |
 
 ---
 
