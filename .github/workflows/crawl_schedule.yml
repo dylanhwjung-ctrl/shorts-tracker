@@ -1,0 +1,30 @@
+name: 크롤링 자동 실행
+
+on:
+  schedule:
+    - cron: '0 0,6,12,18 * * *'   # 매일 UTC 0/6/12/18시 (한국시간 9/15/21/3시)
+  workflow_dispatch:                # 수동 실행 버튼
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 전체 크롤러 실행
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: python crawlers/run_all.py

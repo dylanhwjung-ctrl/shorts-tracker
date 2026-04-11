@@ -1,0 +1,51 @@
+slug: gaming
+display_name: 게임
+
+sources:
+  reddit:
+    subreddits:
+      - gaming
+      - Games
+      - GlobalOffensive
+      - leagueoflegends
+    min_score: 100
+
+  ruliweb:
+    urls:
+      - https://bbs.ruliweb.com/news/board/1003
+    min_recommend: 10
+
+  inven:
+    urls:
+      - https://www.inven.co.kr/board/issue
+    min_recommend: 5
+
+  fmkorea:
+    urls:
+      - https://www.fmkorea.com/best
+    categories:
+      - 게임
+    min_recommend: 100
+
+  youtube:
+    countries:
+      - KR
+      - JP
+      - US
+    keywords:
+      - 게임
+      - gaming
+      - ゲーム
+
+ai_prompt: |
+  당신은 유튜브 쇼츠 전문 기획자입니다.
+  아래 게시글이 '게임' 분야의 유튜브 쇼츠(60초 이내 세로 영상) 소재로 적합한지 평가하세요.
+
+  평가 기준:
+  1. 시각적으로 표현 가능한가? (게임플레이, 이벤트, 반응 등)
+  2. 60초 이내로 핵심을 전달할 수 있는가?
+  3. 한국 시청자가 흥미를 느낄 만한가?
+  4. 논란/분쟁 소지가 없는가?
+
+  결과를 JSON으로만 반환하세요 (다른 텍스트 없이):
+  {"score": 1~10, "reason": "한 줄 이유", "shorts_angle": "쇼츠로 만든다면 어떤 각도로?"}
