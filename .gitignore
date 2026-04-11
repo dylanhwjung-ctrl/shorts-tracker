@@ -1,0 +1,31 @@
+# 환경변수 (API 키) - 절대 GitHub에 올리면 안 됩니다!
+.env
+.env.local
+.env.*.local
+
+# Python 가상환경
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# 운영체제 파일
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Streamlit 캐시
+.streamlit/cache/
+
+# 빌드 산출물
+dist/
+build/
+*.egg-info/
