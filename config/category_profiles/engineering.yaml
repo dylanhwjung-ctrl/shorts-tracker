@@ -4,17 +4,44 @@ display_name: 공학/과학/밀리터리
 sources:
   reddit:
     subreddits:
-      - interestingasfuck    # 산업 현장·중장비·특수 기술
-      - Damnthatsinteresting # 공학 원리·놀라운 사실
-      - educationalgifs      # 시각적 원리 설명
-      - oddlysatisfying      # 기계 공정·제조 과정
-      - todayilearned        # 몰랐던 과학/공학 사실 (TIL)
-      - military             # 군사·무기 체계·비하인드
-      - engineering          # 공학 토론
-    min_score: 500
+      # 산업/중장비
+      - MachinePorn
+      - InfrastructurePorn
+      - oddlysatisfying
+      - specializedtools         # 특수 목적 도구/장비
+      - EngineeringPorn          # 제조 공정, 대형 구조물
+      - ArtisanVideos            # 장인 기술/가공 과정
+      - Skookum                  # 중장비 매니아 커뮤니티
+      # 공학/기계
+      - engineering
+      - mechanical_gifs
+      - CatastrophicFailure      # 공학 실패 사례
+      - AskEngineers             # 공학 Q&A
+      - ThingsCutInHalfPorn      # 단면도
+      - BeAmazed                 # 놀라운 공학/기술
+      # 밀리터리
+      - military
+      - aviation
+      - CredibleDefense          # 심층 군사 분석
+      - WeirdWings               # 특이한 항공기
+      - WarplanePorn             # 군용기 전문
+      # 소방/안전
+      - Firefighting
+      - OSHA                     # 안전 위반 사례
+      - SweatyPalms              # 아찔한 순간
+      # 과학/자연
+      - interestingasfuck
+      - Damnthatsinteresting
+      - educationalgifs
+      - todayilearned
+      - space                    # 우주/천문
+      - science                  # 논문 기반 과학
+      - NatureIsFuckingLit       # 극적 자연 현상
+      - AskScience               # 전문가 답변 Q&A
+    min_score: 200
 
   youtube:
-    category_id: "28"        # Science & Technology
+    category_id: "28"            # Science & Technology
     countries: [KR, US]
 
 ai_prompt: |

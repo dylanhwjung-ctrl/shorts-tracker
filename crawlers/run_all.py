@@ -58,7 +58,7 @@ def main():
     )
 
     # ── 공학/과학 카테고리 ─────────────────────────
-    print("\n[4/8] Reddit 산업/중장비")
+    print("\n[5/9] Reddit 산업/중장비")
     reddit_crawler.run(
         category="engineering",
         subcategory="산업/중장비",
@@ -66,30 +66,41 @@ def main():
             "MachinePorn",
             "InfrastructurePorn",
             "oddlysatisfying",
+            "specializedtools",      # 특수 목적 도구/장비
+            "EngineeringPorn",       # 제조 공정, 대형 구조물
+            "ArtisanVideos",         # 장인 기술/가공 과정
+            "Skookum",               # 중장비 매니아 커뮤니티
         ],
-        min_score=300,
+        min_score=200,
     )
 
-    print("\n[5/8] Reddit 공학/기계")
+    print("\n[6/9] Reddit 공학/기계")
     reddit_crawler.run(
         category="engineering",
         subcategory="공학/기계",
         subreddits=[
             "engineering",
             "mechanical_gifs",
+            "CatastrophicFailure",   # 공학 실패 사례 — 내러티브 풍부
+            "AskEngineers",          # 공학 Q&A, 비하인드 스토리
+            "ThingsCutInHalfPorn",   # 단면도 — "내부는 이렇게 생겼다"
+            "BeAmazed",              # 놀라운 공학/기술
         ],
         min_score=200,
     )
 
-    print("\n[6/8] Reddit + 루리웹 밀리터리")
+    print("\n[7/9] Reddit + 루리웹 밀리터리")
     reddit_crawler.run(
         category="engineering",
         subcategory="밀리터리",
         subreddits=[
             "military",
             "aviation",
+            "CredibleDefense",       # 심층 군사 분석
+            "WeirdWings",            # 특이한 항공기
+            "WarplanePorn",          # 군용기 전문
         ],
-        min_score=300,
+        min_score=200,
     )
     ruliweb_crawler.run(
         category="engineering",
@@ -99,18 +110,19 @@ def main():
         min_hit=50,
     )
 
-    print("\n[7/8] Reddit 소방/안전")
+    print("\n[8/9] Reddit 소방/안전")
     reddit_crawler.run(
         category="engineering",
         subcategory="소방/안전",
         subreddits=[
             "Firefighting",
-            "CERT",
+            "OSHA",                  # 안전 위반 사례 (~827K)
+            "SweatyPalms",           # 아찔한 순간 — 안전 교훈
         ],
         min_score=50,
     )
 
-    print("\n[8/8] Reddit 과학/자연")
+    print("\n[9/9] Reddit 과학/자연")
     reddit_crawler.run(
         category="engineering",
         subcategory="과학/자연",
@@ -119,6 +131,10 @@ def main():
             "Damnthatsinteresting",
             "educationalgifs",
             "todayilearned",
+            "space",                 # 우주/천문
+            "science",               # 논문 기반 과학
+            "NatureIsFuckingLit",    # 극적 자연 현상
+            "AskScience",            # 전문가 답변 Q&A
         ],
         min_score=500,
     )
