@@ -20,9 +20,9 @@ CATEGORY_LABELS = {
 }
 
 SUBCATEGORY_OPTIONS = {
-    "gaming":      ["전체", "게임 감상/토론", "게임 IP 덕질", "게임 뉴스"],
+    "gaming":      ["전체", "게임 감상/토론", "게임 IP 덕질", "게임 로어/세계관", "게임 비하인드", "게임 이스터에그", "게임 뉴스"],
     "engineering": ["전체", "산업/중장비", "공학/기계", "밀리터리", "소방/안전", "과학/자연"],
-    "baseball":    ["전체", "MLB 뉴스/토론"],
+    "baseball":    ["전체", "MLB 뉴스/토론", "MLB 팀 커뮤니티"],
 }
 
 
@@ -47,7 +47,7 @@ def render_community_tab():
             format_func=lambda x: SOURCE_LABELS.get(x, x),
         )
 
-        sort_by = st.radio("정렬", ["점수 높은순", "최신순"])
+        sort_by = st.radio("정렬", ["최신순", "점수 높은순"])
 
     # ── 메인 콘텐츠 ─────────────────────────────────────────────────
     if not sources:
