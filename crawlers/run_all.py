@@ -14,18 +14,19 @@ def main():
     print("=" * 50)
 
     # ── 게임 카테고리 ──────────────────────────────
-    print("\n[1/3] Reddit 게임 감상/토론")
+    print("\n[1/7] Reddit 게임 감상/토론")
     reddit_crawler.run(
         category="gaming",
         subcategory="게임 감상/토론",
         subreddits=[
             "patientgamers",
             "truegaming",
+            "Games",                 # 밈 금지 규칙 → 텍스트 품질 높음 (~3.2M)
         ],
         min_score=100,
     )
 
-    print("\n[2/3] Reddit 게임 IP 덕질")
+    print("\n[2/7] Reddit 게임 IP 덕질")
     reddit_crawler.run(
         category="gaming",
         subcategory="게임 IP 덕질",
@@ -35,11 +36,53 @@ def main():
             "darkestdungeon",
             "residentevil",
             "detroitbecomehuman",
+            "Eldenring",             # 프롬소프트 로어 분석의 성지 (~2.3M)
+            "bloodborne",            # 러브크래프트적 세계관 해석 (~412K)
+            "darksouls",             # 시리즈 전체 로어 통합 분석 (~586K)
+            "HollowKnight",          # 인디 게임 로어의 대표 (~1.2M)
+            "Fallout",               # 터미널 로그, 환경 스토리텔링 (~1.9M)
+            "witcher",               # 게임+소설+드라마 통합 로어 (~1.3M)
+            "metalgearsolid",        # 코지마 게임 복잡한 스토리 해석 (~271K)
         ],
         min_score=100,
     )
 
-    print("\n[3/4] 루리웹 게임 뉴스 (PC)")
+    print("\n[3/7] Reddit 게임 로어/세계관")
+    reddit_crawler.run(
+        category="gaming",
+        subcategory="게임 로어/세계관",
+        subreddits=[
+            "teslore",               # 엘더스크롤 로어 전문 (~155K)
+            "falloutlore",           # 폴아웃 로어 전문 (~197K)
+            "FanTheories",           # 팬 이론 — 게임 포함 (~2.2M)
+        ],
+        min_score=50,
+    )
+
+    print("\n[4/7] Reddit 게임 비하인드")
+    reddit_crawler.run(
+        category="gaming",
+        subcategory="게임 비하인드",
+        subreddits=[
+            "gamedev",               # 개발자 직접 참여 비하인드 스토리 (~1.9M)
+            "lostmedia",             # 사라진 게임/미출시 프로토타입 (~361K)
+            "TheMakingOfGames",      # 게임 제작 비하인드 전문 (~22K)
+        ],
+        min_score=50,
+    )
+
+    print("\n[5/7] Reddit 게임 이스터에그")
+    reddit_crawler.run(
+        category="gaming",
+        subcategory="게임 이스터에그",
+        subreddits=[
+            "GamingDetails",         # 숨겨진 디테일 전문 — 게시물=쇼츠 소재 (~263K)
+            "creepygaming",          # 소름끼치는 숨겨진 요소 전문 (~167K)
+        ],
+        min_score=50,
+    )
+
+    print("\n[6/7] 루리웹 게임 뉴스 (PC)")
     ruliweb_crawler.run(
         category="gaming",
         subcategory="게임 뉴스",
@@ -48,7 +91,7 @@ def main():
         min_hit=50,
     )
 
-    print("\n[4/4] 루리웹 게임 뉴스 (PS)")
+    print("\n[7/7] 루리웹 게임 뉴스 (PS)")
     ruliweb_crawler.run(
         category="gaming",
         subcategory="게임 뉴스",
@@ -140,12 +183,26 @@ def main():
     )
 
     # ── MLB 야구 ───────────────────────────────────────
-    print("\n[MLB] Reddit r/baseball")
+    print("\n[MLB 1/2] Reddit MLB 뉴스/토론")
     reddit_crawler.run(
         category="baseball",
         subcategory="MLB 뉴스/토론",
-        subreddits=["baseball"],
+        subreddits=[
+            "baseball",
+            "mlb",                   # r/baseball과 겹치지 않는 콘텐츠 (~3M)
+        ],
         min_score=500,
+    )
+
+    print("\n[MLB 2/2] Reddit MLB 팀 커뮤니티")
+    reddit_crawler.run(
+        category="baseball",
+        subcategory="MLB 팀 커뮤니티",
+        subreddits=[
+            "NYYankees",             # MLB 팀 서브 최대, 양키스=MLB 역사 (~409K)
+            "Dodgers",               # 오타니 효과 → 한국 시청자 친숙 (~347K)
+        ],
+        min_score=200,
     )
 
     # ── 해외 채널 트래커 ───────────────────────────────
