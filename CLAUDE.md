@@ -9,7 +9,7 @@
 
 **프로젝트명:** Shorts Trend Tracker  
 **목적:** 유튜브 쇼츠 콘텐츠 기획자가 온라인 커뮤니티 화제글과 유튜브 급상승 영상을 한 눈에 보고 소재를 발굴하는 웹 대시보드  
-**작업 폴더:** `E:\tracker\`  
+**작업 폴더:** `tracker/` — 데스크톱 `E:\tracker` / 맥 `~/tracker` (Synology junction으로 양쪽 기기 공유)  
 **사용자 레벨:** 코딩 완전 초보자 (명령어 한 줄씩 안내 필요)
 
 ---
@@ -23,7 +23,7 @@
 | 데이터베이스 | Supabase | - | PostgreSQL, 무료 티어 500MB |
 | 자동화/스케줄링 | GitHub Actions | - | 크론 잡, 무료 2000분/월 |
 | Reddit 크롤링 | PRAW | latest | 공식 API |
-| 웹 스크래핑 | httpx + BeautifulSoup4 | latest | 루리웹, 인벤, FM코리아 |
+| 웹 스크래핑 | httpx + BeautifulSoup4 | latest | 인벤, FM코리아 (루리웹은 2026-04-17 제거) |
 | 디시인사이드 | 비공식 모바일 API | - | 우선순위 낮음, 나중에 추가 |
 | YouTube | google-api-python-client | latest | 공식 Data API v3 |
 | AI 판단 | Anthropic Claude API (Haiku) | latest | 쇼츠 소재 적합성 판단 |
@@ -35,7 +35,7 @@
 ## 디렉토리 구조
 
 ```
-E:\tracker\
+tracker/                         # 데스크톱 E:\tracker / 맥 ~/tracker (junction)
 ├── CLAUDE.md                    # 이 파일 (하네스)
 ├── .env                         # API 키 모음 (절대 GitHub에 올리지 말 것!)
 ├── .gitignore                   # .env 등 민감 파일 제외 설정
@@ -51,7 +51,7 @@ E:\tracker\
 ├── crawlers/                    # 각 소스별 크롤러 모듈
 │   ├── __init__.py
 │   ├── reddit_crawler.py
-│   ├── ruliweb_crawler.py
+│   ├── ruliweb_crawler.py       # 2026-04-17 비활성 (run_all.py에서 미호출)
 │   ├── inven_crawler.py
 │   ├── fmkorea_crawler.py
 │   ├── dcinside_crawler.py      # 나중에 추가
@@ -148,11 +148,6 @@ sources:
     subreddits: [gaming, Games, GlobalOffensive, leagueoflegends]
     min_score: 500
     min_comments: 50
-  ruliweb:
-    urls:
-      - https://bbs.ruliweb.com/news/board/1003
-      - https://bbs.ruliweb.com/game
-    min_recommend: 10
   inven:
     urls:
       - https://www.inven.co.kr/board/issue
@@ -204,7 +199,7 @@ ai_prompt: |
 | 소스 | 파일 | 상태 |
 |------|------|------|
 | Reddit | crawlers/reddit_crawler.py | ✅ 작동 (공개 JSON API) |
-| 루리웹 | crawlers/ruliweb_crawler.py | ✅ 작동 |
+| 루리웹 | crawlers/ruliweb_crawler.py | ⏸ 2026-04-17 비활성 (쇼츠 적합도 낮음) |
 | Hacker News | crawlers/hackernews_crawler.py | ✅ 작동 (공식 API) |
 | YouTube | crawlers/youtube_crawler.py | ✅ 작동 |
 | FM코리아 | crawlers/fmkorea_crawler.py | ⏸ 보류 — 430 봇 차단, Playwright 필요 |
@@ -222,7 +217,7 @@ ai_prompt: |
 
 3. **에러 대응:** 에러 발생 시 "에러 메시지 전체를 복사해서 저에게 붙여넣어 주세요"라고 안내할 것.
 
-4. **파일 경로 명시:** 파일 생성 시 항상 `E:\tracker\파일명` 형태로 전체 경로를 명시할 것.
+4. **파일 경로 명시:** 파일은 기본적으로 `tracker/파일명` 상대 경로로 명시. OS별 실행 커맨드나 절대경로가 필요한 경우(복붙용 터미널 명령 등)만 데스크톱 `E:\tracker\...` / 맥 `~/tracker/...` 양쪽 병기.
 
 5. **단계 확인:** 각 마일스톤의 하위 작업 완료 시 "✅ 완료! 다음은 [다음 작업]입니다. 진행할까요?" 형태로 확인 후 진행.
 
