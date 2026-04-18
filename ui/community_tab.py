@@ -10,7 +10,6 @@ from database.client import get_client
 
 SOURCE_LABELS = {
     "reddit":  "Reddit",
-    "ruliweb": "루리웹",
 }
 
 CATEGORY_LABELS = {
@@ -21,7 +20,7 @@ CATEGORY_LABELS = {
 
 SUBCATEGORY_OPTIONS = {
     "gaming":      ["전체", "게임 감상/토론", "게임 IP 덕질", "게임 로어/세계관", "게임 비하인드", "게임 이스터에그", "게임 뉴스"],
-    "engineering": ["전체", "산업/중장비", "공학/기계", "밀리터리", "소방/안전", "과학/자연"],
+    "engineering": ["전체", "산업/중장비", "공학/기계", "밀리터리", "소방/안전", "과학/자연", "교통/운송"],
     "baseball":    ["전체", "MLB 뉴스/토론", "MLB 팀 커뮤니티"],
 }
 
@@ -42,8 +41,8 @@ def render_community_tab():
 
         sources = st.multiselect(
             "소스",
-            options=["reddit", "ruliweb"],
-            default=["reddit", "ruliweb"],
+            options=["reddit"],
+            default=["reddit"],
             format_func=lambda x: SOURCE_LABELS.get(x, x),
         )
 

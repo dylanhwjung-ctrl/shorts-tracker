@@ -7,11 +7,14 @@ sources:
       # 산업/중장비
       - MachinePorn
       - InfrastructurePorn
-      - oddlysatisfying
       - specializedtools         # 특수 목적 도구/장비
       - EngineeringPorn          # 제조 공정, 대형 구조물
       - ArtisanVideos            # 장인 기술/가공 과정
       - Skookum                  # 중장비 매니아 커뮤니티
+      - Construction             # 건설 현장 스토리
+      - metalworking             # 금속 가공/공예
+      - Blacksmith               # 대장장이/수공예
+      - welding                  # 용접
       # 공학/기계
       - engineering
       - mechanical_gifs
@@ -38,6 +41,8 @@ sources:
       - science                  # 논문 기반 과학
       - NatureIsFuckingLit       # 극적 자연 현상
       - AskScience               # 전문가 답변 Q&A
+      # 교통/운송
+      - Trains                   # 철도/기관차
     min_score: 200
 
   youtube:

@@ -34,12 +34,6 @@ sources:
       - creepygaming             # 소름끼치는 숨겨진 요소
     min_score: 50
 
-  ruliweb:
-    urls:
-      - https://bbs.ruliweb.com/pc/board/300007
-      - https://bbs.ruliweb.com/ps/board/300001
-    min_recommend: 10
-
   inven:
     urls:
       - https://www.inven.co.kr/board/issue
