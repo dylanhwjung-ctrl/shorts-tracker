@@ -5,7 +5,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from crawlers import reddit_crawler, ruliweb_crawler, channel_crawler
+from crawlers import reddit_crawler, channel_crawler
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
     print("=" * 50)
 
     # ── 게임 카테고리 ──────────────────────────────
-    print("\n[1/7] Reddit 게임 감상/토론")
+    print("\n[게임 1/5] Reddit 게임 감상/토론")
     reddit_crawler.run(
         category="gaming",
         subcategory="게임 감상/토론",
@@ -23,10 +23,10 @@ def main():
             "truegaming",
             "Games",                 # 밈 금지 규칙 → 텍스트 품질 높음 (~3.2M)
         ],
-        min_score=100,
+        min_score=50,
     )
 
-    print("\n[2/7] Reddit 게임 IP 덕질")
+    print("\n[게임 2/5] Reddit 게임 IP 덕질")
     reddit_crawler.run(
         category="gaming",
         subcategory="게임 IP 덕질",
@@ -44,10 +44,10 @@ def main():
             "witcher",               # 게임+소설+드라마 통합 로어 (~1.3M)
             "metalgearsolid",        # 코지마 게임 복잡한 스토리 해석 (~271K)
         ],
-        min_score=100,
+        min_score=50,
     )
 
-    print("\n[3/7] Reddit 게임 로어/세계관")
+    print("\n[게임 3/5] Reddit 게임 로어/세계관")
     reddit_crawler.run(
         category="gaming",
         subcategory="게임 로어/세계관",
@@ -56,10 +56,10 @@ def main():
             "falloutlore",           # 폴아웃 로어 전문 (~197K)
             "FanTheories",           # 팬 이론 — 게임 포함 (~2.2M)
         ],
-        min_score=50,
+        min_score=30,
     )
 
-    print("\n[4/7] Reddit 게임 비하인드")
+    print("\n[게임 4/5] Reddit 게임 비하인드")
     reddit_crawler.run(
         category="gaming",
         subcategory="게임 비하인드",
@@ -68,10 +68,10 @@ def main():
             "lostmedia",             # 사라진 게임/미출시 프로토타입 (~361K)
             "TheMakingOfGames",      # 게임 제작 비하인드 전문 (~22K)
         ],
-        min_score=50,
+        min_score=30,
     )
 
-    print("\n[5/7] Reddit 게임 이스터에그")
+    print("\n[게임 5/5] Reddit 게임 이스터에그")
     reddit_crawler.run(
         category="gaming",
         subcategory="게임 이스터에그",
@@ -79,45 +79,30 @@ def main():
             "GamingDetails",         # 숨겨진 디테일 전문 — 게시물=쇼츠 소재 (~263K)
             "creepygaming",          # 소름끼치는 숨겨진 요소 전문 (~167K)
         ],
-        min_score=50,
-    )
-
-    print("\n[6/7] 루리웹 게임 뉴스 (PC)")
-    ruliweb_crawler.run(
-        category="gaming",
-        subcategory="게임 뉴스",
-        urls=["https://bbs.ruliweb.com/pc/board/300007"],
-        board_name="루리웹_PC게임",
-        min_hit=50,
-    )
-
-    print("\n[7/7] 루리웹 게임 뉴스 (PS)")
-    ruliweb_crawler.run(
-        category="gaming",
-        subcategory="게임 뉴스",
-        urls=["https://bbs.ruliweb.com/ps/board/300001"],
-        board_name="루리웹_PS게임",
-        min_hit=50,
+        min_score=30,
     )
 
     # ── 공학/과학 카테고리 ─────────────────────────
-    print("\n[5/9] Reddit 산업/중장비")
+    print("\n[공학 1/6] Reddit 산업/중장비")
     reddit_crawler.run(
         category="engineering",
         subcategory="산업/중장비",
         subreddits=[
             "MachinePorn",
             "InfrastructurePorn",
-            "oddlysatisfying",
             "specializedtools",      # 특수 목적 도구/장비
             "EngineeringPorn",       # 제조 공정, 대형 구조물
             "ArtisanVideos",         # 장인 기술/가공 과정
             "Skookum",               # 중장비 매니아 커뮤니티
+            "Construction",          # 건설 현장 스토리 (560K)
+            "metalworking",          # 금속 가공/공예 (1.1M)
+            "Blacksmith",            # 대장장이/수공예 (316K)
+            "welding",               # 용접 (512K)
         ],
-        min_score=200,
+        min_score=50,
     )
 
-    print("\n[6/9] Reddit 공학/기계")
+    print("\n[공학 2/6] Reddit 공학/기계")
     reddit_crawler.run(
         category="engineering",
         subcategory="공학/기계",
@@ -129,10 +114,10 @@ def main():
             "ThingsCutInHalfPorn",   # 단면도 — "내부는 이렇게 생겼다"
             "BeAmazed",              # 놀라운 공학/기술
         ],
-        min_score=200,
+        min_score=30,
     )
 
-    print("\n[7/9] Reddit + 루리웹 밀리터리")
+    print("\n[공학 3/6] Reddit 밀리터리")
     reddit_crawler.run(
         category="engineering",
         subcategory="밀리터리",
@@ -143,17 +128,10 @@ def main():
             "WeirdWings",            # 특이한 항공기
             "WarplanePorn",          # 군용기 전문
         ],
-        min_score=200,
-    )
-    ruliweb_crawler.run(
-        category="engineering",
-        subcategory="밀리터리",
-        urls=["https://bbs.ruliweb.com/hobby/board/300143"],
-        board_name="루리웹_밀리터리",
-        min_hit=50,
+        min_score=100,
     )
 
-    print("\n[8/9] Reddit 소방/안전")
+    print("\n[공학 4/6] Reddit 소방/안전")
     reddit_crawler.run(
         category="engineering",
         subcategory="소방/안전",
@@ -162,10 +140,10 @@ def main():
             "OSHA",                  # 안전 위반 사례 (~827K)
             "SweatyPalms",           # 아찔한 순간 — 안전 교훈
         ],
-        min_score=50,
+        min_score=30,
     )
 
-    print("\n[9/9] Reddit 과학/자연")
+    print("\n[공학 5/6] Reddit 과학/자연")
     reddit_crawler.run(
         category="engineering",
         subcategory="과학/자연",
@@ -182,6 +160,16 @@ def main():
         min_score=500,
     )
 
+    print("\n[공학 6/6] Reddit 교통/운송")
+    reddit_crawler.run(
+        category="engineering",
+        subcategory="교통/운송",
+        subreddits=[
+            "Trains",                # 철도/기관차 (633K)
+        ],
+        min_score=50,
+    )
+
     # ── MLB 야구 ───────────────────────────────────────
     print("\n[MLB 1/2] Reddit MLB 뉴스/토론")
     reddit_crawler.run(
@@ -191,7 +179,7 @@ def main():
             "baseball",
             "mlb",                   # r/baseball과 겹치지 않는 콘텐츠 (~3M)
         ],
-        min_score=500,
+        min_score=150,
     )
 
     print("\n[MLB 2/2] Reddit MLB 팀 커뮤니티")
@@ -202,7 +190,7 @@ def main():
             "NYYankees",             # MLB 팀 서브 최대, 양키스=MLB 역사 (~409K)
             "Dodgers",               # 오타니 효과 → 한국 시청자 친숙 (~347K)
         ],
-        min_score=200,
+        min_score=100,
     )
 
     # ── 해외 채널 트래커 ───────────────────────────────
