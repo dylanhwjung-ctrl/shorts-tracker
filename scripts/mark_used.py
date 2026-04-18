@@ -74,7 +74,7 @@ def fetch_from_db(url):
         return None
 
     sb_url = os.getenv("SUPABASE_URL")
-    sb_key = os.getenv("SUPABASE_ANON_KEY")
+    sb_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
     if not sb_url or not sb_key:
         return None
 

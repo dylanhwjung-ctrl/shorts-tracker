@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Streamlit Cloud 시크릿 → 환경변수 주입 (로컬은 .env 사용)
 try:
-    for key in ["SUPABASE_URL", "SUPABASE_ANON_KEY"]:
+    for key in ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]:
         if key in st.secrets:
             os.environ[key] = st.secrets[key]
 except Exception:
