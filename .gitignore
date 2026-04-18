@@ -29,3 +29,6 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+
+# 런타임 상태 (사용 완료 소재 기록)
+scripts/used_materials.json
